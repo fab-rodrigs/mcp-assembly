@@ -46,7 +46,7 @@ paridade: .word 0        		# Local de armazenamento para a paridade 0x10018004
 	syscall				# chama o serviço de sistema para imprimir a string
 .end_macro
 
-.text
+.
     li $t0, 0				# quantidade de bits ligados = 0
 	
     la $gp, 0x10018000 			# define global pointer como endereço inicial do .data
@@ -58,15 +58,14 @@ paridade: .word 0        		# Local de armazenamento para a paridade 0x10018004
     while1_start:	
 	beq  $s0, $0,  while1_end       # Verifica se $s0 é igual a 0, se for, vai para DONE
 	andi $t0, $s1, 0x01        	# Armazena o bit menos significativo de $s1 em $t0
-#       0b0000 0000 0000 0000 1111 1110 1111 1110
-# and:  0b0000 0000 0000 0000 0000 0000 0000 0001
-# $t0 = 0b0000 0000 0000 0000 0000 0000 0000 0000
+
 	if1:
 	    beq  $t0, $0, if1_else      # Verifica se o bit em $t0 é zero, se for, vai para if1_out
 	if1_them:
 	    addi $s0, $s0, 1            # Se o bit em $t0 não for zero, incrementa $s0 em 1
 	if1_out:
-	srl $s1, $s1, 1       	        # Realiza um deslocamento lógico para a direita em $s1 (divisão por 2)
+	srl $s1, $s1, 1       	        # Realiza um deslocamento lógico 
+ a direita em $s1 (divisão por 2)
 # $s1 = 0b0000 0000 0000 0000 1111 1110 1111 1110
 #$s1/2= 0b0000 0000 0000 0000 0111 1111 0111 1111
 	j while1_start:                 # Volta para o início do loop (etiqueta LOOP)
