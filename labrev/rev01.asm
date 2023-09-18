@@ -39,7 +39,6 @@ div $t1, $t0, $t4	# f = x / y
 
 li $t5, 3		# i = 3
 
-
 sll $t6, $t5, 2			# $t6 = i * 4
 la $s0, A
 la $s1, B
@@ -54,17 +53,27 @@ sw $s1, 0($t6)			# B[$t6] = 2 * A[$t6]
 ######################################
 # B[f+g] = A[i] / (A[j] - B[j])
 
-add $t7, $t1, $t2	# x = f + g
-lw $t8, A($t5)		# Carrega A[i] em $t8
-lw $t9, B($t7)		# Carrega B[f+g] em $t9
-sub $t0, $t8, $t9	# x = A[i] - B[f+g]
-div $t0, $t0		# x = x / (A[j] - B[j])
-mflo $t0		# x = resultado da divisão
-sw $t0, B($t7)		# Armazena o resultado em B[f+g]
+li $t5, 3		# i = 3
+li $t6, 4		# j = 4
+la $s0, A
+la $s1, B
 
+sll $t5, $t5, 2		# i = i * 4
+sll $t6, $t6, 2		# j = j * 4
 
+add $t6, $s0, $t6	# endereço(B[j]) = $s0 + $t6
+lw $s0, 0($t6)		# A[j] = $t6
+lw $s1, 0($t6)		# B[j] = $t6
 
+sub $t7, $s0, $s1	# $t7 = A[j] - B[j]
 
+add $t5, $s0, $t5	# endereço(A[i]) = $s0 + $t5
+lw $s0, 0($t5)		# A[i] = $t5
 
+div $t8, $s0, $t7	# $t8 = A[i] / $t7
 
+add $t7, $t1, $t2	# $t7 = f + g
+sll $t7, $t7, 2		# $t7 = $t7 * 4 
+lw $s3, 0($t7)		# $s3 = $t7
 
+add $s3, $t8, $0	# B[f+g] = $t8
