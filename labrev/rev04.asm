@@ -16,13 +16,8 @@
 #########################################################
 
 .data 0x10018000
-palavra:  .word 0        		# Local de armazenamento para a palavra 0x10018000
-paridade: .word 0        		# Local de armazenamento para a paridade 0x10018004
-
-.macro exit
-	li $v0, 10
-	syscall
-.end_macro
+palavra:  .word 0        		# 0x10018000 Local de armazenamento para a palavra 0x10018000
+paridade: .word 0        		# 0x10018004 Local de armazenamento para a paridade 0x10018004
 
 .macro imprimirString (%str)
 	.data
@@ -40,34 +35,52 @@ paridade: .word 0        		# Local de armazenamento para a paridade 0x10018004
 	move %reg, $v0 
 .end_macro
 
-.macro imprimirInt (%reg)
-	li $v0, 1			# carrega o código do serviço de sistema para imprimir uma string em $v0
+.macro imprimirBin (%reg)
+	li $v0, 35			# carrega o código do serviço de sistema para imprimir um binario em $v0
 	add $a0, $zero, %reg		# carrega string ao registrador $a0
 	syscall				# chama o serviço de sistema para imprimir a string
 .end_macro
 
-.
-    li $t0, 0				# quantidade de bits ligados = 0
+.text
+    la $gp, 0x10010000 			# define global pointer como endereço inicial do .data
+    lw $s0, 0($gp)			# $s0 <- palavra
+    lw $s1, 4($gp)			# $s1 <- paridade
+    
+    li $t0, 0				# verificador mascara
+    li $t1, 0				# quantidade de bits ligados = 0
+    li $t2, 2				# $t2 = 2
 	
     la $gp, 0x10018000 			# define global pointer como endereço inicial do .data
     lw $s0, 0($gp)			# $s0 <- palavra
     
+    imprimirString("\n--------------------------------------\n")
     imprimirString("palavra = ")
     lerInt($s0)				# lê palavra
     
+    imprimirString("\nbinario = ")
+    imprimirBin($s0)
+    imprimirString("\n--------------------------------------\n")
+    
     while1_start:	
 	beq  $s0, $0,  while1_end       # Verifica se $s0 é igual a 0, se for, vai para DONE
-	andi $t0, $s1, 0x01        	# Armazena o bit menos significativo de $s1 em $t0
-
+	andi $t0, $s0, 0x01        	# Armazena o bit menos significativo de $s1 em $t0
 	if1:
-	    beq  $t0, $0, if1_else      # Verifica se o bit em $t0 é zero, se for, vai para if1_out
+	    beq  $t0, $0, if1_out     # Verifica se o bit em $t0 é zero, se for, vai para if1_out
 	if1_them:
-	    addi $s0, $s0, 1            # Se o bit em $t0 não for zero, incrementa $s0 em 1
+	    addi $t1, $t1, 1            # Se o bit em $t0 não for zero, incrementa $s0 em 1
 	if1_out:
-	srl $s1, $s1, 1       	        # Realiza um deslocamento lógico 
- a direita em $s1 (divisão por 2)
-# $s1 = 0b0000 0000 0000 0000 1111 1110 1111 1110
-#$s1/2= 0b0000 0000 0000 0000 0111 1111 0111 1111
-	j while1_start:                 # Volta para o início do loop (etiqueta LOOP)
-while1_end:
+	srl $s0, $s0, 1       	        # Realiza um deslocamento lógico 
+	j while1_start                  # Volta para o início do loop (etiqueta LOOP)
+    while1_end:
     
+    if2:
+    	div $t1, $t2
+    	mfhi $t1
+    	bnez $t1, if2_else
+    if2_them:
+    	imprimirString("Paridade é par.\n")
+    	j if2_out
+    if2_else:
+    	imprimirString("Paridade é ímpar.\n")
+    if2_out:
+    	
