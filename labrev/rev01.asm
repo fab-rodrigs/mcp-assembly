@@ -38,9 +38,18 @@ div $t1, $t0, $t4	# f = x / y
 # B[i] = 2 * A[i] 
 
 li $t5, 3		# i = 3
-lw $t6, A($t5)		# Carrega A[i] em $t6
-sll $t6, $t6, 1		# Multiplica A[i] por 2
-sw $t6, B($t5)		# Armazena o resultado em B[i]
+
+
+sll $t6, $t5, 2			# $t6 = i * 4
+la $s0, A
+la $s1, B
+			
+add $t7, $t6, $s0		# $t7 = $t6 + $s0
+lw $t7, 0($t6)			# $t7 = A[$t6]
+sll $t7, $t6, 1			# $t7 = 2 * A[1]
+
+add $t6, $t6, $s1		# $t6 = $t6 + $s0
+sw $s1, 0($t6)			# B[$t6] = 2 * A[$t6]
 
 ######################################
 # B[f+g] = A[i] / (A[j] - B[j])
@@ -52,7 +61,6 @@ sub $t0, $t8, $t9	# x = A[i] - B[f+g]
 div $t0, $t0		# x = x / (A[j] - B[j])
 mflo $t0		# x = resultado da divisão
 sw $t0, B($t7)		# Armazena o resultado em B[f+g]
-
 
 
 
