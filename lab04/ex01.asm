@@ -91,10 +91,31 @@ str1:       .asciiz "MCP22105 is cool"
 # 65(A) e 90(Z). A conversão pode ser feita somando
 # ou subtraindo a diferença entre esses valores.
 #
-changeCase:
 
+# void changeCase(char *str, int type);
+# A função converte as letras na string em minúsculas (type = 0) ou maiúsculas (type = 1).
+
+changeCase:
+    # Argumentos:
+    # $a0 - Endereço da string
+    # $a1 - Tipo (0 para minúsculas, 1 para maiúsculas)
+
+    if1:
+        lb $t0, ($a0)  # Carrega um byte da string
+        beqz $t0, if1_them # Verifica se a string é nula
+    if1_else:
+	if2:
+	    beqz $a1, if2_them
+	if2_else:
 	
-	jr $ra
+	if2_them:
+
+	j if1_out
+    if1_them:
+    	"A string é nula"
+    if1_out:
+        jr $ra  # Retorna
+
 #############################################
 
 #############################################	
@@ -117,4 +138,5 @@ strlen:
 	strlen_L0_exit:
 	jr $ra
 #############################################
+	
 	
