@@ -75,10 +75,42 @@ str1:       .asciiz "MCP22105 is cool"
 # equivalente a sua posição na string (índice).
 #  Caso o caracter não seja encontrado, o procedimento
 # deve retornar -1.
-#
+# 
+# int strSearch(char * str, char value){
+# 	int index = 0;	
+# 	
+# 	while(str[index] != '\0'){
+# 		
+# 		if(str[index] == value)
+# 			return index;
+# 
+# 		index++;
+# 	}
+# 	
+# 	return -1;	 // Caso não seja encontrado o carácter
+# }
+
 strSearch:
- 
- 
+# $a0: ponteiro para a string
+# $a1: caractere a ser procurado
+# $v0: resultado (índice ou -1)
+	li $v0, -1				# $v0 = -1 caso não encontre carácter
+	li $t1, 0				# index = 0
+ 	
+ 	while1:
+ 		lb $t0, 0($a0)    		# carrega o caractere atual da string em $t0
+ 		beq $t0, $zero, while1_out	# caso o caracter seja igual a 0, sai do while
+ 		
+ 		if1:
+ 			beq $t0, $a1, if1_them
+ 		if1_else:
+ 			addi $a0, $a0, 1	# soma 1 no endereço da string 
+ 			addi $t1, $t1, 1  	# incrementa o índice
+ 			j while1		# volta pro início do loop
+ 		if1_them:
+ 			move $v0, $t1   	# armazena o índice em $v0			
+ 	while1_out:
+	
  	jr $ra
 #############################################
 
