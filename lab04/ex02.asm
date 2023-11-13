@@ -55,8 +55,8 @@ str1:       .asciiz "MCP22105 is cool"
 	print_str(" caracteres\n")
 	
 	## Resize str1
-	la $a0, str1
-	li $a1, 8
+	la $a0, str1			# primeiro parâmetro
+	li $a1, 8			# segundo parâmetro
 	jal strResize
 	
 	print_str("Str1 ajustada: ")
@@ -88,8 +88,45 @@ str1:       .asciiz "MCP22105 is cool"
 # string, caso contrário, ou seja, o próprio valor de
 # size.
 #
-strResize:
+# int strResize(char *str, int size) {
+#     // Verifica se size é maior que o tamanho atual da string
+#     if (size >= strlen(str)) {
+#         return -1;
+#     }
+# 
+#     // Redimensiona a string para o novo tamanho
+#     str[size] = '\0';
+# 
+#     return size;
+# }
 
+
+strResize:
+    	# $a0: ponteiro para a string
+    	# $a1: novo tamanho
+    	# $v0: resultado (novo tamanho ou -1)
+    
+    	li $v0, -1  # Inicializa $v0 com -1
+    	
+    	# Chama strlen para obter o tamanho atual da string
+    	move $a0, $a0
+    	jal strlen
+    	move $s0, $v0  # $s0 contém o tamanho atual
+    	
+    	if1:
+    		bge $a1, $s0, if1_else		# caso o tamanho solicitado >= tamanho atual, vai pro else
+    	if1_them:
+    		# Ajusta o tamanho da string para $a1
+    		li $v0, 0
+    		move $t0, $a0  # $t0 contém o ponteiro original para a string
+    		move $a0, $a1  # $a0 contém o novo tamanho
+    		jal strlen     # Calcula o novo tamanho da string após o ajuste
+    		move $s1, $v0  # $s1 contém o novo tamanho
+
+    		# Ajusta o ponteiro para a string
+    		add $a0, $t0, $s1
+    		sb  $zero, 0($a0)  # Adiciona o caractere nulo ao final da string
+    	if1_else:
 	jr $ra
 #############################################
 
