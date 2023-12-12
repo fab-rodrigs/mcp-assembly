@@ -1,3 +1,8 @@
+.data
+colors:  .space 32    # 8 elementos * 4 bytes cada (assumindo que int tem 4 bytes)
+sprites: .space 80    # 20 elementos * 4 bytes cada (assumindo que um ponteiro para um sprite tem 4 bytes)
+sprite:  .space 49    # Tamanho do array de sprite
+
 .text 0x00430000
 
 #  int colors[8];
@@ -7,18 +12,37 @@
 # void draw_sprite(X, Y, sprite_id){
 #       char * ptr_sprite =  sprites[sprite_id];
 #       for(int i = 0; i < 49; i++){ 
-#	    color = colors[*ptr_sprite];
+#	    	color = colors[*ptr_sprite];
 #           sX = i % 7 ;
-#	    sY = i / 7 ;
+#	    	sY = i / 7 ;
 #           sX = X + sX;
 #           sY = Y + sY;
-#           set_pixel(sX, sY, color)
+#           set_pixel(sX, sY, color);
 #           ptr_sprite++;
 #       }
 # }
 ## IMP
-draw_sprite:
 
+draw_sprite:
+# X = $a0 ; Y = $a1 ; sprite_id = $a2
+#	char *ptr_sprite = sprite[sprite_id];
+
+	la $t0, sprites # $t3 contém o endereço base dos sprites (*ptr_sprite)
+
+	for1:
+		li $t1, 0	# i = 0
+		li $t7, 7
+		bge $t1, 49, for1_out # if(i >= 49), sai do if
+		rem $t2, $t1, $t7	# sX = i % 7
+		div $t3, $t1, $t7   # sY = t1 / 7
+		add $t2, $a0, $t2	# sX = X + sX
+		add $t3, $a1, $t3	# sY = Y + sY
+		jal set_pixel		# set_pixel(sX, sY, color)
+		addi $t0, $t0, 1	# ptr_sprite++
+		addi $t1, $t1, 1	# i++
+		j for1				# volta pro inicio do loop
+	for1_out:
+	
     jr   $ra
 #=============================================================
 
@@ -28,7 +52,8 @@ draw_sprite:
 draw_animated_sprite:
 	# Chama draw_sprite com a posição contida na estrutura
 	# animated_sprite
-
+	# $a0 = animated_sprite*
+	jal draw_sprite
 	jr    $ra
 #=============================================================
 
