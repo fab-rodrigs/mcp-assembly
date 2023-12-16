@@ -13,7 +13,7 @@ main:
 main_L0:	
 	## Desenha o sprite animado	
 	la $a0, pacman
-	jal draw_animated_sprite	# implementar
+	jal draw_animated_sprite
 	
 	## Verifica se posso mover ele
     ## Se não puder, para o sprite
@@ -26,7 +26,7 @@ main_L0:
 	
 	## Busca no teclado se há comando do user
 	la  $a0, input_move
-	jal process_input	# implementar
+	jal process_input
 	
 	## Tenta mudar o movimento se for possível
 	la  $a0, pacman

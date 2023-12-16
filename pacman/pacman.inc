@@ -1,4 +1,4 @@
-.eqv FB_PTR 0x10040000 # Framebuffer display
+.eqv FB_PTR 0x10040000
 .eqv FB_XRES 256
 .eqv FB_YRES 256
 

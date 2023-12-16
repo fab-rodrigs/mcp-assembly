@@ -1,8 +1,3 @@
-.data
-colors:  .space 32    # 8 elementos * 4 bytes cada (assumindo que int tem 4 bytes)
-sprites: .space 80    # 20 elementos * 4 bytes cada (assumindo que um ponteiro para um sprite tem 4 bytes)
-sprite:  .space 49    # Tamanho do array de sprite
-
 .text 0x00430000
 
 #  int colors[8];
@@ -12,48 +7,130 @@ sprite:  .space 49    # Tamanho do array de sprite
 # void draw_sprite(X, Y, sprite_id){
 #       char * ptr_sprite =  sprites[sprite_id];
 #       for(int i = 0; i < 49; i++){ 
-#	    	color = colors[*ptr_sprite];
+#			color = colors[*ptr_sprite];
 #           sX = i % 7 ;
-#	    	sY = i / 7 ;
+#			sY = i / 7 ;
 #           sX = X + sX;
 #           sY = Y + sY;
-#           set_pixel(sX, sY, color);
+#        	set_pixel(sX, sY, color)
 #           ptr_sprite++;
 #       }
 # }
 ## IMP
 
-draw_sprite:
-# X = $a0 ; Y = $a1 ; sprite_id = $a2
-#	char *ptr_sprite = sprite[sprite_id];
+# main
+# --- old stack   40 ($sp)
+#============= 
+#  <empty>        36 ($sp)
+#-------------
+#  $ra            32 ($sp)
+#-------------
+#  $s4            28 ($sp)
+#-------------
+#  $s3            24 ($sp)
+#-------------
+#  $s2            20 ($sp)
+#-------------
+#  $s1            16 ($sp)
+#-------------
+#  $s0            12 ($sp)
+#-------------
+#  $a2            8 ($sp)
+#-------------
+#  $a1            4 ($sp)
+#-------------
+#  $a0            0 ($sp)
+#=============
 
-	la $t0, sprites # $t3 contém o endereço base dos sprites (*ptr_sprite)
+draw_sprite: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
+	addiu $sp, $sp, -40
+	sw   $ra, 32($sp)
+	sw   $s4, 28($sp)
+	sw   $s3, 24($sp)
+	sw   $s2, 20($sp)
+	sw   $s1, 16($sp)
+	sw   $s0, 12($sp)
+#	sw   $a2, 8($sp)
+#	sw   $a1, 4($sp)
+#	sw   $a0, 0($sp)
 
-	for1:
-		li $t1, 0	# i = 0
-		li $t7, 7
-		bge $t1, 49, for1_out # if(i >= 49), sai do if
-		rem $t2, $t1, $t7	# sX = i % 7
-		div $t3, $t1, $t7   # sY = t1 / 7
-		add $t2, $a0, $t2	# sX = X + sX
-		add $t3, $a1, $t3	# sY = Y + sY
-		jal set_pixel		# set_pixel(sX, sY, color)
-		addi $t0, $t0, 1	# ptr_sprite++
-		addi $t1, $t1, 1	# i++
-		j for1				# volta pro inicio do loop
-	for1_out:
+	move $s0,$a0	# s0 = X
+	move $s1,$a1	# s1 = Y
+#	move $s2,$a2	# s2 = sprite_id
 	
+	la $s2, colors		# Endereço base do array de cores
+	
+	la $s3, sprites 	# s3 = *ptr_sprite
+	mul $t2, $a2, 49  	# Offset do sprite_id
+	add $s3, $s3, $t2   # char * ptr_sprite = sprites[sprite_id];
+	
+	li $s4, 0			# i = 0
+	
+	for1:
+		bge $s4, 49, for1_out		# if (i >= 49) , sai do for1
+		
+		lb $t2, 0($s3) 			# Carrega o valor apontado por ptr_sprite
+		sll $t2, $t2, 2			# Multiplica o índice de cor por 4 (tamanho de um inteiro)
+		add $t2, $t2, $s2		# Soma o offset ao endereço base para obter o endereço final da cor
+		lw $a2, 0($t2)			# Carrega a cor na variável $s30
+		
+		li $t7, 7			# t7 = 7
+		div $s4, $t7			# i / 7
+		mfhi $t2        		# sX = i % 7
+		mflo $t3        	 	# sY = i / 7
+		
+		add $a0, $s0, $t2		# sX = X + sX
+		add $a1, $s1, $t3		# sY = Y + sY
+		
+		jal set_pixel
+		
+		addi $s3, $s3, 1		# ptr_sprite++
+		addi $s4, $s4, 1		# i++
+		
+		j for1					# Volta para for1
+	for1_out:
+
+#	lw   $a0, 0($sp)
+#	lw   $a1, 4($sp)
+#	lw   $a2, 8($sp)
+	lw   $s0, 12($sp)
+	lw   $s1, 16($sp)
+	lw   $s2, 20($sp)
+	lw   $s3, 24($sp)
+	lw   $s4, 28($sp)
+	lw   $ra, 32($sp)
+	addiu $sp, $sp, 40
     jr   $ra
 #=============================================================
 
 #=============================================================
+# main
+# --- old stack   8 ($sp)
+#============= 
+#  $ra        	  4 ($sp)
+#-------------
+#  $s0            0 ($sp)
+#=============
+
 # void draw_animated_sprite(animated_sprite*)
 ## IMP
-draw_animated_sprite:
+draw_animated_sprite: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
 	# Chama draw_sprite com a posição contida na estrutura
 	# animated_sprite
-	# $a0 = animated_sprite*
+	addi $sp, $sp, -8
+	sw   $ra, 4($sp)
+	sw   $a0, 0($sp)
+	
+	move $t0, $a0   # Move o ponteiro da estrutura animated_sprite para $t0
+	
+	lw $a0, 4($t0)  # X
+	lw $a1, 8($t0)  # Y
+	lw $a2, 0($t0)  # sprite_id
 	jal draw_sprite
+
+	lw   $a0, 0($sp)
+	lw   $ra, 4($sp)
+	addi $sp, $sp, 8
 	jr    $ra
 #=============================================================
 
@@ -65,7 +142,7 @@ apply_movement:
 	add  $t0, $t0, $t1
 	sw   $t0, 4($a0)
 	
-	lw 	 $t0, 8($a0)
+	lw   $t0, 8($a0)
 	lw   $t1, 16($a0)
 	add  $t0, $t0, $t1
 	sw   $t0, 8($a0)
@@ -160,20 +237,14 @@ draw_grid_L0_end:
 #=============================================================
 
 # struct mov_vector {
-#    int valid;  // --> seta para 1
-#    int mov_x;	
+#    int valid;
+#    int mov_x;
 #    int mov_y;
 # }
-# 
-# w (^) (-1, 0)
-# a (<) (0,-1)
-# s (v) (1, 0)
-# d (<) (0, 1)
-#
 #=============================================================
 #IMP
 # process_input(mov_vector *)
-process_input:
+process_input: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
     ## Verificar se key_rb está vazio
     ## Se estiver, retornar
 	
@@ -190,7 +261,7 @@ process_input:
 
 #=============================================================   
 # void try_change_movement(animated_sprite* sp, mov_vector* mv)
-try_change_movement:
+try_change_movement: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
 	## Verifica se mov_vector é válido
 	## Se não, retorna.
 
@@ -261,7 +332,7 @@ try_change_movement_end:
 
 #=============================================================
 # bool check_movement(animated_sprite*)
-check_movement:
+check_movement: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
 	## Converte posição pixel para posicao grid
 	## Lembrete - se resto divisao == 0, está alinhado
 	

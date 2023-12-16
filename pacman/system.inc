@@ -98,7 +98,7 @@ enable_keyboard_int:
 #        display definidas em pacman.inc
 #=============================================================
 # void set_pixel(X, Y, color)
-set_pixel:
+set_pixel: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
    #mul $t0, $a0, FB_YRES
    sll $t0, $a0, 8       # t0 = x * 256
    add $t0, $t0, $a1	 # t0 = t0 + y
@@ -107,6 +107,7 @@ set_pixel:
    add $t0, $t0, $t1
    sw $a2, 0($t0)
    jr  $ra
+
 #=============================================================
 
 #=============================================================
