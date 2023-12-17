@@ -16,7 +16,7 @@ main_L0:
 	jal draw_animated_sprite
 	
 	## Verifica se posso mover ele
-    ## Se n√£o puder, para o sprite
+    	## Se n„o puder, para o sprite
 	la  $a0, pacman
 	jal check_movement
 	
@@ -24,11 +24,11 @@ main_L0:
 	la  $a0, pacman
 	jal apply_movement
 	
-	## Busca no teclado se h√° comando do user
+	## Busca no teclado se h· comando do user
 	la  $a0, input_move
 	jal process_input
 	
-	## Tenta mudar o movimento se for poss√≠vel
+	## Tenta mudar o movimento se for possÌvel
 	la  $a0, pacman
 	la  $a1, input_move
 	jal try_change_movement

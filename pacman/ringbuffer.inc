@@ -35,7 +35,15 @@ rb_init:
 #	}
 # }
 rb_empty: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
-
+	lw $t0,0($a0)	# rbuf->size
+	if1:
+		bne $t0, 0, if1_else	# if (rbuf->size != 0) --> vai pro else
+	if1_them:
+		li $v0, 1
+		j if1_out
+	if1_else:
+		li $v0, 0
+	if1_out:
 	jr   $ra
 
 # bool rb_full(t_ringbuffer * rbuf){
@@ -45,9 +53,29 @@ rb_empty: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#I
 #		return 0;
 # } 
 rb_full: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
-
+	lw $t0,0($a0)	# rbuf->size
+	if2:
+		bne $t0, RB_MAX_SIZE, if2_else	# if (rbuf->size == MAX_SIZE) --> vai pro else
+	if2_them:
+		li $v0, 1
+		j if2_out
+	if2_else:
+		li $v0, 0
+	if2_out:
 	jr   $ra
-	
+
+# main
+# --- old stack  16 ($sp)
+#============= 
+#  <empty>       12 ($sp)
+#-------------
+#  $ra        	  8 ($sp)
+#-------------
+#  $s0        	  4 ($sp)
+#-------------
+#  $a0            0 ($sp)
+#=============
+
 #char rb_read(t_ringbuffer * rbuf){
 #	char tmp = 0;
 #	if(!rbuf_empty(rbuf)){
@@ -58,8 +86,34 @@ rb_full: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IM
 #	return tmp;
 #}
 rb_read: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
+	addiu $sp, $sp, -8
+	sw $ra, 4($sp)
+	
+	li $t5, 0		# char tmp = 0
+	
+	jal rb_empty
+	if3:
+		bne $v0, $0, if3_out	# if ( rbuf_empty(rbuf) == 0 ) --> sai do if
+	if3_them:
+		sw   $t0, 0($a0)   # rbuf->size
+		addi $t0, $t0, -1  # rbuf->size--
 
-	jr $ra
+		lw   $t1, 4($a0)   # rbuf->rd
+		add  $t2, $t1, $a0
+		lb   $t5, 12($t2)  # tmp = rbuf->buf[rbuf->rd];
+
+		addi $t1, $t1, 1   # rbuf->rd++
+		li   $t3, RB_MAX_SIZE
+		div  $t1, $t3
+		mfhi $t1
+		sw   $t1, 4($a0)   # rbuf->rd = (rbuf->rd + 1) % RB_MAX_SIZE
+
+	if3_out:
+	#move $v0, $t5
+	addi $v0, $t5, 0
+	lw   $ra, 4($sp)
+	addiu $sp, $sp, 8
+	jr   $ra
 
 # bool rb_write(t_ringbuffer * rbuf, char byte){
 #	if(!rbuf_full(rbuf)){

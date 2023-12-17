@@ -53,9 +53,9 @@ exception_handler:
 	mflo  $t0
 	sw    $t0, 120($k0) 
 	
-	### Tratamento das exceÃ§Ãµes/interrupÃ§Ãµes
+	### Tratamento das exceções/interrupções
 	
-    # Identificar a causa da excecÃ£o/interrupcÃ£o
+    # Identificar a causa da excecão/interrupcão
 	mfc0 	    $t0, $13
 	andi		$t0, $t0, 0x007C
 	la  		$t1, _kexception_msg
@@ -64,7 +64,7 @@ exception_handler:
 	li 		    $v0, 4
 	syscall
 	
-	#Verifica interrupÃ§Ã£o de hardware
+	#Verifica interrupção de hardware
 	srl 		$t0, $t0, 2
 	beqz 		$t0, exception_handler_Hardware
 
@@ -80,10 +80,21 @@ exception_handler_SoftException:
     mtc0  	$t0, $14      # EPC = point to next instruction
     j		exception_handler_Done 
 
-exception_handler_Hardware:
+exception_handler_Hardware: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
 	# Chama getchar para ler tecla digitada e escreve
 	# no ringbuffer do teclado
 	# IMP
+	
+	la $t0, getchar  # Carrega o endereço da função getchar em $t8
+    jalr $t0         # Chama getchar e salta para a instrução seguinte quando terminar
+    #jal getchar
+	
+    la $a0, key_rb   # Carrega o endereço do ringbuffer do teclado em $a0
+    addi $a1, $v0, 0 # Move o valor de retorno de getchar (tecla lida) para $a1
+    
+    la $t0, rb_write # Carrega o endereÃ§o da funÃ§Ã£o rb_write em $t9
+    jalr $t0         # Chama rb_write com os parÃ¢metros apropriados
+    #jal rb_write
 	
 exception_handler_Done:
 
@@ -97,7 +108,7 @@ exception_handler_Done:
 	lw    $a1, 16($k0)
 	lw    $a2, 20($k0)
 	lw    $a3, 24($k0)
-	
+	lw    $t0, 28($k0)
 	lw    $t1, 32($k0)
 	lw    $t2, 36($k0)
 	lw    $t3, 40($k0)
@@ -123,11 +134,8 @@ exception_handler_Done:
 	mthi  $t0
 	lw    $t0, 120($k0) 
 	mtlo  $t0
-	
-	lw    $t0, 28($k0)
-	
+
 	addi  $k0, $k0, 124
 
 	eret
 	
-

@@ -109,7 +109,7 @@ draw_sprite: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IM
 #============= 
 #  $ra        	  4 ($sp)
 #-------------
-#  $s0            0 ($sp)
+#  $a0            0 ($sp)
 #=============
 
 # void draw_animated_sprite(animated_sprite*)
