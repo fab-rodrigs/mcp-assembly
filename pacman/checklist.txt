@@ -1,4 +1,4 @@
-exceception - undone
+exceception - done
 macros - done
 main - done
 pacman - done
