@@ -65,13 +65,9 @@ rb_full: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IM
 	jr   $ra
 
 # main
-# --- old stack  16 ($sp)
+# --- old stack  8 ($sp)
 #============= 
-#  <empty>       12 ($sp)
-#-------------
-#  $ra        	  8 ($sp)
-#-------------
-#  $s0        	  4 ($sp)
+#  $ra        	  4 ($sp)
 #-------------
 #  $a0            0 ($sp)
 #=============
@@ -124,6 +120,41 @@ rb_read: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IM
 #	}
 #	return 0;
 # }
-rb_write: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
 
+# main
+# --- old stack  8 ($sp)
+#============= 
+#  $ra        	  4 ($sp)
+#-------------
+#  $a0            0 ($sp)
+#=============
+
+rb_write: #IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP#IMP# 
+	addiu $sp, $sp, -8
+	sw $ra, 4($sp)
+	
+	jal rb_full
+	
+	if4:
+		bne $v0, $0, if4_out # if (rb_full != 0) --> sai do if
+	if4_them:
+		lw $t0, 0($a0)      # Carrega rbuf->size
+		addi $t0, $t0, 1	# rbuf->size++
+		sw $t0, 0($a0)      # Armazena rbuf->size
+		
+		lw $t0, 8($a0)      # Carrega rbuf->wr
+		add $t1, $t0, $a0   # Calcula o endereço de rbuf->buf[rbuf->wr]
+		
+		addi $t0, $t0, 1	# rbuf->wr + 1
+		lw $t3, RB_MAX_SIZE
+		div $t0, $t3
+		mfhi $t2	# (rbuf->wr + 1) % MAX_SIZE
+		
+		li $v0, 1	# retorna 1
+	
+	if4_out:
+	
+	li $v0, 0	# retorna 0
+	lw   $ra, 4($sp)
+	addiu $sp, $sp, 8
 	jr $ra
