@@ -2,7 +2,7 @@ exceception - done
 macros - done
 main - done
 pacman - done
-ringbuffer - undone
+ringbuffer - done
 sprites - undone
 stdlib - done
 system - done
